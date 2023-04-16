@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+
+<body>
+    <canvas id="mainCanvas" width="500" height="500" style="border:1px solid #d3d3d3;">
+        Your browser does not support the canvas element.
+    </canvas>
+    <br/>
+    Width: <input type="text" id="width" value="500" onchange="setWidth()">
+    Height: <input type="text" id="height" value="500" onchange="setHeight()">
+    <br/>
+    <button onclick="doMain()">Start</button>
+    <script>
+        MAX_X = 500;
+        MAX_Y = 500;
+        POINTS = [[1, MAX_Y - 1], [MAX_X / 2, 1], [MAX_X - 1, MAX_Y - 1]];
+        const styles = ["#FF0000", "#00FF00", "#0000FF"];
+
+        function dot(ctx, x, y, style) {
+            ctx.fillStyle = style;
+            ctx.fillRect(x, y, 1, 1);
+        }
+
+        function setHeight() {
+            MAX_Y = document.getElementById("height").value;
+        }
+        function setWidth() {
+            MAX_X = document.getElementById("width").value;
+        }
+        function getRandomPoint(A, B, C) {
+            r1 = Math.random();
+            r2 = Math.random();
+            sqrtR1 = Math.sqrt(r1);
+
+            x = Math.floor((1 - sqrtR1) * A[0] + (sqrtR1 * (1 - r2)) * B[0] + (sqrtR1 * r2) * C[0]);
+            y = Math.floor((1 - sqrtR1) * A[1] + (sqrtR1 * (1 - r2)) * B[1] + (sqrtR1 * r2) * C[1]);
+
+            return [x, y];
+        }
+
+        function sleep(ms) {
+            return new Promise(r => setTimeout(r, ms));
+        }
+
+        function getTwoPoints(points) {
+            p1pos = Math.floor(Math.random() * points.length);
+            p2pos = p1pos;
+            while (p1pos === p2pos) {
+                p2pos = Math.floor(Math.random() * points.length);
+            }
+            let p1 = points[p1pos];
+            let p2 = points[p2pos];
+            return { p1, p2 };
+        }
+
+        async function main(ctx) {
+            ctx.moveTo(0, 0);
+            for (point of POINTS) {
+                dot(ctx, point[0], point[1]);
+            }
+            randomPointInside = getRandomPoint(POINTS[0], POINTS[1], POINTS[2]);
+            for (i = 0; i < 100000; i++) {
+                randomVertexIndex = Math.floor(Math.random() * POINTS.length);
+                randomVertex = POINTS[randomVertexIndex];
+                randomPointInside = [Math.floor((randomVertex[0] + randomPointInside[0]) / 2), Math.floor((randomVertex[1] + randomPointInside[1]) / 2)];
+                dot(ctx, randomPointInside[0], randomPointInside[1], styles[randomVertexIndex]);
+                if (Math.random() > 0.9) await sleep(1);
+            }
+            console.log(POINTS);
+            ctx.stroke();
+        }
+
+        var canvas = document.getElementById("mainCanvas");
+        var ctx = canvas.getContext("2d");
+
+
+        function doMain() {
+            ctx.canvas.width = MAX_X;
+            ctx.canvas.height = MAX_Y;
+            POINTS = [[1, MAX_Y - 1], [MAX_X / 2, 1], [MAX_X - 1, MAX_Y - 1]];
+            main(ctx);
+        }
+    </script>
+
+</body>
+
+</html>
